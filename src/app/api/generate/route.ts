@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
             target,
             mode,
             questions: generatedSurvey.questions,
-            sourcePrompt: prompt || undefined,
+            ...(prompt ? { sourcePrompt: prompt } : {}),
             createdAt: new Date(),
             status: 'draft',
         });
