@@ -28,7 +28,7 @@ export async function generateSurveyFromText(params: {
 }): Promise<GeneratedSurvey> {
     const { target, mode, text, prompt } = params;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     const systemPrompt = `당신은 교육용 설문지를 전문적으로 만드는 AI 어시스턴트입니다.
 주어진 내용을 분석하여 설문 문항을 생성해주세요.
@@ -107,7 +107,7 @@ export async function generateSurveyFromImage(params: {
 }): Promise<GeneratedSurvey> {
     const { target, mode, imageBase64, mimeType, prompt } = params;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     const systemPrompt = `당신은 교육용 설문지를 전문적으로 만드는 AI 어시스턴트입니다.
 이미지에서 내용을 추출하고 분석하여 설문 문항을 생성해주세요.
