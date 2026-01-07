@@ -1,10 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGenerativeModel } from 'firebase/vertexai-preview';
+import { vertexAI } from '@/lib/firebase';
 import type { Question, SurveyTarget, SurveyMode } from '@/types';
-
-// Lazy initialization to ensure API key is available at runtime
-function getGenAI() {
-    return new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-}
 
 const TARGET_DESCRIPTIONS: Record<SurveyTarget, string> = {
     student: '초중고 학생',
@@ -31,7 +27,7 @@ export async function generateSurveyFromText(params: {
 }): Promise<GeneratedSurvey> {
     const { target, mode, text, prompt } = params;
 
-    const model = getGenAI().getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = getGenerativeModel(vertexAI, { model: 'gemini-1.5-flash' });
 
     const systemPrompt = `당신은 교육용 설문지를 전문적으로 만드는 AI 어시스턴트입니다.
 주어진 내용을 분석하여 설문 문항을 생성해주세요.
@@ -110,7 +106,7 @@ export async function generateSurveyFromImage(params: {
 }): Promise<GeneratedSurvey> {
     const { target, mode, imageBase64, mimeType, prompt } = params;
 
-    const model = getGenAI().getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = getGenerativeModel(vertexAI, { model: 'gemini-1.5-flash' });
 
     const systemPrompt = `당신은 교육용 설문지를 전문적으로 만드는 AI 어시스턴트입니다.
 이미지에서 내용을 추출하고 분석하여 설문 문항을 생성해주세요.

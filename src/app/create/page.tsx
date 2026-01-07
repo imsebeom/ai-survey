@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import type { SurveyTarget } from '@/types';
+import { generateSurveyFromText } from '@/lib/gemini';
+import { createSurvey } from '@/lib/firebase';
 import { TARGET_LABELS } from '@/types';
 
 export default function CreateSurveyPage() {
@@ -27,32 +29,32 @@ export default function CreateSurveyPage() {
         setError(null);
 
         try {
-            const formData = new FormData();
-            formData.append('target', target);
-            formData.append('mode', 'classic'); // Mode is determined at deployment URL
-
-            if (text) {
-                formData.append('text', text);
-            }
-            if (prompt) {
-                formData.append('prompt', prompt);
-            }
-
-            const response = await fetch('/api/generate', {
-                method: 'POST',
-                body: formData,
+            // 1. Generate survey content using Vertex AI (Client-side)
+            const generatedSurvey = await generateSurveyFromText({
+                target,
+                mode: 'classic', // TODO: Make this selectable if needed
+                text: text || undefined,
+                prompt: prompt || undefined,
             });
 
-            const data = await response.json();
+            // 2. Save to Firestore (Client-side)
+            const surveyId = await createSurvey({
+                title: generatedSurvey.title,
+                description: generatedSurvey.description,
+                target,
+                mode: 'classic',
+                questions: generatedSurvey.questions,
+                ...(prompt ? { sourcePrompt: prompt } : {}),
+                createdAt: new Date(),
+                status: 'draft',
+            });
 
-            if (data.success && data.surveyId) {
-                router.push(`/preview/${data.surveyId}`);
-            } else {
-                setError(data.error || '설문 생성에 실패했습니다.');
-            }
+            router.push(`/preview/${surveyId}`);
+
         } catch (err) {
             console.error('Submit error:', err);
-            setError('설문 생성 중 오류가 발생했습니다.');
+            const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류';
+            setError(`설문 생성 중 오류가 발생했습니다: ${errorMessage}`);
         } finally {
             setIsLoading(false);
         }

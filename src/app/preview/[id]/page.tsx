@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import type { Survey, Question, QuestionType } from '@/types';
+import { getSurvey, updateSurvey } from '@/lib/firebase';
 import { QUESTION_TYPE_LABELS } from '@/types';
 
 interface PreviewPageProps {
@@ -22,13 +23,13 @@ export default function PreviewPage({ params }: PreviewPageProps) {
     useEffect(() => {
         async function fetchSurvey() {
             try {
-                const response = await fetch(`/api/surveys/${id}`);
-                const data = await response.json();
+                // Direct Firestore call
+                const data = await getSurvey(id);
 
-                if (data.success && data.survey) {
-                    setSurvey(data.survey);
+                if (data) {
+                    setSurvey(data);
                 } else {
-                    setError(data.error || '설문을 불러올 수 없습니다.');
+                    setError('설문을 불러올 수 없습니다.');
                 }
             } catch (err) {
                 console.error('Fetch error:', err);
@@ -104,22 +105,13 @@ export default function PreviewPage({ params }: PreviewPageProps) {
         setError(null);
 
         try {
-            const response = await fetch(`/api/surveys/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    questions: survey.questions,
-                    status: 'published',
-                }),
+            // Direct Firestore call
+            await updateSurvey(id, {
+                questions: survey.questions,
+                status: 'published',
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                router.push(`/deploy/${id}`);
-            } else {
-                setError(data.error || '저장에 실패했습니다.');
-            }
+            router.push(`/deploy/${id}`);
         } catch (err) {
             console.error('Save error:', err);
             setError('저장 중 오류가 발생했습니다.');

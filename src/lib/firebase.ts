@@ -12,6 +12,7 @@ import {
     orderBy,
     Timestamp,
 } from 'firebase/firestore';
+import { getVertexAI } from 'firebase/vertexai-preview';
 import type { Survey, SurveyResponse } from '@/types';
 
 const firebaseConfig = {
@@ -26,6 +27,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
+export const vertexAI = getVertexAI(app);
 
 // Collections
 const SURVEYS_COLLECTION = 'surveys';
