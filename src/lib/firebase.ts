@@ -31,10 +31,18 @@ export const db = getFirestore(app);
 const SURVEYS_COLLECTION = 'surveys';
 const RESPONSES_COLLECTION = 'responses';
 
+// Utility function to remove undefined values from an object
+function removeUndefined<T extends object>(obj: T): Partial<T> {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([, value]) => value !== undefined)
+    ) as Partial<T>;
+}
+
 // Survey CRUD
 export async function createSurvey(survey: Omit<Survey, 'id'>): Promise<string> {
+    const cleanedSurvey = removeUndefined(survey);
     const docRef = await addDoc(collection(db, SURVEYS_COLLECTION), {
-        ...survey,
+        ...cleanedSurvey,
         createdAt: Timestamp.fromDate(survey.createdAt),
     });
     return docRef.id;
@@ -80,8 +88,9 @@ export async function getAllSurveys(): Promise<Survey[]> {
 
 // Response CRUD
 export async function createResponse(response: Omit<SurveyResponse, 'id'>): Promise<string> {
+    const cleanedResponse = removeUndefined(response);
     const docRef = await addDoc(collection(db, RESPONSES_COLLECTION), {
-        ...response,
+        ...cleanedResponse,
         submittedAt: Timestamp.fromDate(response.submittedAt),
     });
     return docRef.id;
