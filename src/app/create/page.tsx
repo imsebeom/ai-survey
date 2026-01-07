@@ -30,14 +30,17 @@ export default function CreateSurveyPage() {
 
         try {
             // 1. Generate survey content using Vertex AI (Client-side)
+            console.log('Generating survey...');
             const generatedSurvey = await generateSurveyFromText({
                 target,
                 mode: 'classic', // TODO: Make this selectable if needed
                 text: text || undefined,
                 prompt: prompt || undefined,
             });
+            console.log('Survey generated:', generatedSurvey);
 
             // 2. Save to Firestore (Client-side)
+            console.log('Saving to Firestore...');
             const surveyId = await createSurvey({
                 title: generatedSurvey.title,
                 description: generatedSurvey.description,
@@ -48,7 +51,9 @@ export default function CreateSurveyPage() {
                 createdAt: new Date(),
                 status: 'draft',
             });
+            console.log('Saved to Firestore. ID:', surveyId);
 
+            console.log('Navigating to preview...');
             router.push(`/preview/${surveyId}`);
 
         } catch (err) {
